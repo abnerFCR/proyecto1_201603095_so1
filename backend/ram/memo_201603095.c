@@ -19,7 +19,11 @@ static int escribir_archivo(struct seq_file * archivo, void *v) {
     si_meminfo(&informacion_sistema);
     long totalRam 	= (informacion_sistema.totalram * 4);
     long ramLibre 	= (informacion_sistema.freeram * 4 );
-
+    seq_printf(archivo, "{\n");
+    seq_printf(archivo, "\t\"totalRam\":\"%8lu\",\n", totalRam);
+    seq_printf(archivo, "\t\"ramLibre\":\"%8lu\"\n", ramLibre);
+    seq_printf(archivo, "}\n");
+    /*
     seq_printf(archivo, "**********************************************\n");
     seq_printf(archivo, "*  CARNET: 201603095                       *\n");
     seq_printf(archivo, "*  NOMBRE: Abner Fernando Cardona Ramirez  *\n");
@@ -28,6 +32,7 @@ static int escribir_archivo(struct seq_file * archivo, void *v) {
     seq_printf(archivo, " MEMORIA LIBRE: :      %8lu \tKB\t - %8lu \tMB\n", ramLibre, ramLibre / 1024);
     seq_printf(archivo, " PORCENTAJE MEMORIA UTILIZADA:  %i %%\n", (ramLibre * 100)/totalRam) ;
     seq_printf(archivo, "***************************************************\n\n");
+    */
     return 0;
 }
 

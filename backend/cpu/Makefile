@@ -1,9 +1,7 @@
 obj-m += cpu_201603095.o
 
-KERNELDIR ?= /lib/modules/$(shell uname -r)/build
-
-initmodules:
-	make -C $(KERNELDIR) M=$(PWD) modules
-
-cleanmodules:
-	make -C $(KERNELDIR) M=$(PWD) clean
+all:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
+	
+clean:
+	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean

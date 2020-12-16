@@ -6,7 +6,7 @@ import ChartistGraph from 'react-chartist';
 class App extends Component {
 
    url_api = 'http://localhost:5000'
-
+   
    obj = {
       method: 'GET',
       headers: {
@@ -31,9 +31,19 @@ class App extends Component {
          data: [
 
          ],
-         LineDataRAM: {
-            labels: [],
-            series: [
+         mi_ram  :{
+            totalRam: 0,
+            ramLibre: 0,
+            LineDataRAM: {
+               labels: [],
+               series: [
+                  []
+               ]
+            },
+         },
+         LineDataCPU:{
+            labels:[],
+            series:[
                []
             ]
          },
@@ -49,11 +59,13 @@ class App extends Component {
       this.req = this.req.bind(this)
       this.destroyInterval = this.destroyInterval.bind(this)
       this.handleClickKill = this.handleClickKill.bind(this)
-      this.handleInpunt = this.handleInpunt.bind(this)
+      //this.handleInpunt = this.handleInpunt.bind(this)
       this.appView = this.appView.bind(this)
+      this.initInterval(this);
    }
 
    initInterval(e) {
+      console.log("aca jalasjdflkasjd");
       this.intervalGraphics = setInterval(() => {
          this.req()
 
@@ -61,11 +73,35 @@ class App extends Component {
    }
 
    req() {
-      console.log("pasaron 5 seg")
+      //console.log("pasaron 5 seg")
       let date = new Date()
 
-      this.state.LineDataRAM.labels.push(date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds())
+      this.state.mi_ram.LineDataRAM.labels.push(date.getHours() + ":" + date.getMinutes() + ":" + date.getSeconds())
+      
+      fetch(this.url_api + '/getram').then(res => {
+         return res.text()
+      }).then((dat) => {
+         dat = dat.toString().replace(/,}/g, "}")
+         dat = dat.toString().replace(/,]/g, "]")
+         var data = JSON.parse(dat)
 
+         
+
+         if (this.state.mi_ram.LineDataRAM.series[0].length > 9) {
+            this.state.mi_ram.LineDataRAM.series[0].shift()
+            this.state.mi_ram.LineDataRAM.labels.shift()
+         }
+
+         this.state.mi_ram.totalRam = (data.totalRam/1024).toFixed(2);
+         this.state.mi_ram.ramLibre = (data.ramLibre/1024).toFixed(2);
+         this.state.mi_ram.LineDataRAM = this.state.mi_ram.LineDataRAM;   
+         this.setState(this.state); 
+         this.state.mi_ram.LineDataRAM.series[0].push(((this.state.mi_ram.totalRam - this.state.mi_ram.ramLibre)/this.state.mi_ram.totalRam)*100)
+      })
+      //console.log(this.state.mi_ram.LineDataRAM);
+      
+
+   
       fetch(this.url_api + '/getall').then(res => {
          return res.text()
       }).then((dat) => {
@@ -74,17 +110,19 @@ class App extends Component {
 
          var data = JSON.parse(dat)
 
-         this.state.LineDataRAM.series[0].push(data.totalram - data.freeram)
+         /*
+         this.state.LineDataCPU.series[0].push(data.totalram - data.freeram)
          if (this.state.LineDataRAM.series[0].length > 9) {
             this.state.LineDataRAM.series[0].shift()
             this.state.LineDataRAM.labels.shift()
          }
+         */
          this.setState({
             ram: data.usedram,
             total: data.totalram,
             used: data.totalram - data.freeram,
             data: [data.tree],
-            LineDataRAM: this.state.LineDataRAM,
+            LineDataCPU: this.state.LineDataCPU,
             executing: data.executing,
             suspended: data.suspended,
             stopped: data.stopped,
@@ -93,6 +131,7 @@ class App extends Component {
             totalprocess: data.total
          })
       })
+      
    }
 
    destroyInterval(e) {
@@ -112,7 +151,7 @@ class App extends Component {
          console.log(data)
       })
    }
-
+/*
    handleInpunt(e) {
       var { value, name } = e.target
       if (this.state.logged) {
@@ -128,7 +167,7 @@ class App extends Component {
          [name]: value
       })
    }
-
+*/
    process(children, parent, padding) {
       //if (children !== null && children !== undefined && children.length > 0)
 
@@ -186,7 +225,6 @@ class App extends Component {
                      <a className="nav-item nav-link active" id="nav-data-tab" data-toggle="tab" href="#nav-data" role="tab" aria-controls="nav-data" aria-selected="true">Procesos</a>
                      <a className="nav-item nav-link" id="nav-graphics-tab" data-toggle="tab" href="#nav-graphics" role="tab" aria-controls="nav-graphics" aria-selected="false">Monitor de RAM </a>
 										 <a className="nav-item nav-link" id="nav-graphics-tab" data-toggle="tab" href="#nav-graphics2" role="tab" aria-controls="nav-graphics" aria-selected="false">Monitor de CPU </a>
-                     <a className="nav-item nav-link" id="nav-settings-tab" data-toggle="tab" href="#nav-settings" role="tab" aria-controls="nav-settings" aria-selected="false">Configuracion</a>
                   </div>
                </nav>
                <div className="tab-content" id="nav-tabContent">
@@ -251,15 +289,15 @@ class App extends Component {
                            <div className="row">
                               <div className="col col-12 col-md-4">
                                  <span className="d-block text-muted">Total (MB)</span>
-                                 <span className="d-block display-4">{this.state.total}</span>
+                                 <span className="d-block display-4">{this.state.mi_ram.totalRam}</span>
                               </div>
                               <div className="col col-12 col-md-4">
                                  <span className="d-block text-muted">En Uso (MB)</span>
-                                 <span className="d-block display-4">{this.state.used}</span>
+                                 <span className="d-block display-4">{(this.state.mi_ram.totalRam - this.state.mi_ram.ramLibre).toFixed(2)}</span>
                               </div>
                               <div className="col col-12 col-md-4">
                                  <span className="d-block text-muted">En Uso (%)</span>
-                                 <span className="d-block display-4">{this.state.ram}</span>
+                                 <span className="d-block display-4">{(((this.state.mi_ram.totalRam - this.state.mi_ram.ramLibre)/this.state.mi_ram.totalRam)*100).toFixed(2)}</span>
                               </div>
                            </div>
                         </div>
@@ -270,14 +308,14 @@ class App extends Component {
                            <h1 className="h4">RAM en Uso</h1>
                         </div>
                         <div className="card-body">
-                           <ChartistGraph data={this.state.LineDataRAM} options={
+                           <ChartistGraph data={this.state.mi_ram.LineDataRAM} options={
                               {
                                  low: 0,
                                  showArea: true
                               }
                            } type={'Line'} />
                            <div className="d-flex justify-content-around mt-4">
-                              <label htmlFor="">RAM: {this.state.ram}%</label>
+                              <label htmlFor="">RAM: {(((this.state.mi_ram.totalRam - this.state.mi_ram.ramLibre)/this.state.mi_ram.totalRam)*100).toFixed(2)}%</label>
                            </div>
                         </div>
                      </div>
@@ -303,7 +341,7 @@ class App extends Component {
                            <h1 className="h4">RAM en Uso</h1>
                         </div>
                         <div className="card-body">
-                           <ChartistGraph data={this.state.LineDataRAM} options={
+                           <ChartistGraph data={this.state.mi_ram.LineDataCPU} options={
                               {
                                  low: 0,
                                  showArea: true
@@ -315,28 +353,6 @@ class App extends Component {
                         </div>
                      </div>
                   </div>
-
-                  <div className="tab-pane fade" id="nav-settings" role="tabpanel" aria-labelledby="nav-settings-tab">
-
-                     <div className="card mt-3">
-                        <div className="card-header">
-                           <h1 className="h4">API URL</h1>
-                        </div>
-                        <div className="card-body">
-                           <div className="input-group mb-3 mt-4">
-                              <input type="text" onChange={this.handleInpunt} name="url_api" value={this.state.url_api} className="form-control" placeholder="" aria-label="" aria-describedby="basic-addon1" />
-                           </div>
-
-                           <div className="d-flex justify-content-between">
-                              <button onClick={this.initInterval} type="button" className="btn btn-success">Start Real Time</button>
-                              <button onClick={this.destroyInterval} type="button" className="btn btn-danger">Stop Real Time</button>
-                              <button onClick={()=>{this.setState({logged: false})}} type="button" className="btn btn-info">LogOut</button>
-                           </div>
-                        </div>
-                     </div>
-
-                  </div>
-
                </div>
 
             </div>

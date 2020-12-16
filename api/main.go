@@ -8,16 +8,27 @@ import (
 	"strconv"
 	"syscall"
 
-	"github.com/gorilla/mux"
+	"./mux"
 )
 
-var archivo_json = "/proc/proyecto1_sopes1"
+var archivoCPU = "/proc/cpu_201603095"
+var archivoRAM = "/proc/memo_201603095"
 
 //funcion que lee el archivo y lo reenvia al cliente
 func getall(res http.ResponseWriter, req *http.Request) {
-	data, err := ioutil.ReadFile(archivo_json)
+	data, err := ioutil.ReadFile(archivoCPU)
 	if err != nil {
 		fmt.Println("error1:", err)
+	}
+	res.Header().Set("Content-Type", "application/json")
+	res.Header().Set("Access-Control-Allow-Origin", "*")
+	res.Write(data)
+}
+
+func getRAM(res http.ResponseWriter, req *http.Request) {
+	data, err := ioutil.ReadFile(archivoRAM)
+	if err != nil {
+		fmt.Println("error2:", err)
 	}
 	res.Header().Set("Content-Type", "application/json")
 	res.Header().Set("Access-Control-Allow-Origin", "*")
@@ -34,21 +45,21 @@ func killing(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Fprintf(res, "ID invalido en kill")
 		return
-	} else {
-		fmt.Printf("Se procedera a matar al proceso: %d \n", pid)
-		process, err := os.FindProcess(pid)
-		if err != nil {
-			fmt.Println("error:", err)
-		}
-		err = process.Signal(syscall.Signal(0))
-		if err != nil {
-			fmt.Println("error:", err)
-		}
-		err = process.Kill()
-		if err != nil {
-			fmt.Println("error:", err)
-		}
 	}
+	fmt.Printf("Se procedera a matar al proceso: %d \n", pid)
+	process, err := os.FindProcess(pid)
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	err = process.Signal(syscall.Signal(0))
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+	err = process.Kill()
+	if err != nil {
+		fmt.Println("error:", err)
+	}
+
 	res.Header().Set("Access-Control-Allow-Origin", "*")
 
 }
@@ -57,7 +68,9 @@ func main() {
 	router := mux.NewRouter()
 
 	router.HandleFunc("/getall", getall).Methods("GET", "OPTIONS")
+	router.HandleFunc("/getram", getRAM).Methods("GET", "OPTIONS")
 	router.HandleFunc("/kill/{id}", killing).Methods("GET", "OPTIONS")
+	fmt.Println("El servidor esta escuchando en el puerto 5000")
 	http.ListenAndServe(":5000", router)
 }
 

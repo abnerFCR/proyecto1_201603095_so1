@@ -1,7 +1,7 @@
 obj-m += memo_201603095.o
 
-initmodules:
+all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
 	
-cleanmodules:
+clean:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) clean
