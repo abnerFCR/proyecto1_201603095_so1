@@ -174,6 +174,25 @@ class App extends Component {
          console.log(data)
       })
    }
+
+   traerNombre(e) {
+      e.preventDefault()
+     
+      fetch(this.url_api + '/getusername/'+e.currentTarget.value, this.obj).then(res => {
+         return res.text()
+      }).then((dat1) => {
+         var data3
+         try{
+            data3= JSON.parse(dat1)
+           
+            alert(data3.userName)
+         }catch(e){
+            alert("Indefinido")
+            //nombre_usuario_actual = '*****'
+         }
+      })
+   }
+
 /*
    handleInpunt(e) {
       var { value, name } = e.target
@@ -229,9 +248,13 @@ class App extends Component {
                   <a href={"#c_" + child.pid} data-parent={"#p_" + parent} data-toggle="collapse" className="list-group-item list-group-item-action m-0 p-0">
                      <div className="row m-0 p-0">
                         <p className="col-1 m-0 p-0"><small>{child.pid}</small></p>
-                        <p className="col-5 m-0 p-0"><small>{child.name}</small></p>
+                        <p className="col-3 m-0 p-0"><small>{child.name}</small></p>
                         <p className="col-2 m-0 p-0"><small>{(child.state==="S"?"Spleeping":child.state === "D"? "Stopped": child.state==="E"? "Running": child.state==="Z"?"Zombie":"Other")}</small></p>
                         <p className="col-2 m-0 p-0"><small>{child.user}</small></p>
+                        <button onClick={this.traerNombre} value={child.user} type="button" className="col-2 btn rounded-circle p-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" className="bi bi-trash" viewBox="0 0 16 16">
+                           <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
+                           <path fillRule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4L4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
+                        </svg></button>
                         <p className="col-1 m-0 p-0"><small>{child.memory}</small></p>
                         <button onClick={this.handleClickKill} value={child.pid} type="button" className="col-1 btn rounded-circle p-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" className="bi bi-trash" viewBox="0 0 16 16">
                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
@@ -317,9 +340,10 @@ class App extends Component {
                         <div className="card-header ml-0 pl-0 pr-0">
                            <div className="row m-0 p-0">
                               <div className="col-1 m-0 p-0"><small>PID</small></div>
-                              <div className="col-5 m-0 p-0">Nombre</div>
+                              <div className="col-3 m-0 p-0">Nombre</div>
                               <div className="col-2 m-0 p-0">Estado</div>
                               <div className="col-2 m-0 p-0">Usuario</div>
+                              <div className="col-2 m-0 p-0">Mostrar</div>
                               <div className="col-1 m-0 p-0"><small>% RAM.</small></div>
                               <div className="col-1 m-0 p-0"><small>Accion</small></div>
                            </div>
