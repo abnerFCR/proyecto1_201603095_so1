@@ -1,3 +1,9 @@
+#include <linux/sched.h>
+
+#include <linux/sysinfo.h>
+//#include <sys/types.h>
+//#include <pwd.h>
+
 #include <linux/module.h>
 #include <linux/moduleparam.h>
 #include <linux/init.h>
@@ -10,8 +16,7 @@
 #include <linux/swapfile.h>
 #include <linux/seq_file.h>
 #include <linux/sched/task.h>
-#include <linux/sched.h>
-#include <linux/sysinfo.h>
+
 
 #define BUFSIZE         1000
 
@@ -22,6 +27,8 @@ struct task_struct* task_list;
 struct task_struct *task_list_child;
 struct list_head *list;
 
+struct passwd *pw; 
+
 static int nproc = 0;
 static int nprocexecuting = 0;
 static int nprocsuspended = 0;
@@ -30,6 +37,18 @@ static int nproczombie = 0;
 static int nprocother = 0;
 
 struct sysinfo inf;
+
+/*
+const char *getUserName(uid_t uid) 
+{ 
+    pw = getpwuid(uid);
+    pw  = 0;
+    if (pw) { 
+        return pw->pw_name; 
+    } 
+    return ""; 
+} 
+*/
 
 static int escribir_procesos (struct seq_file *archivo, struct task_struct *task){
     struct task_struct *child;
@@ -64,7 +83,7 @@ static int escribir_procesos (struct seq_file *archivo, struct task_struct *task
     }
 
     seq_printf(archivo, "{");
-    seq_printf(archivo, "\"pid\": %d,\"name\": \"%s\",\"state\": \"%c\",\"user\": %d,\"memory\": %ld,", task->pid, task->comm, state, task->cred->uid.val, ((task->mm ? task->mm->total_vm << (PAGE_SHIFT) : 0)/100) / (inf.totalram*4));
+    seq_printf(archivo, "\"pid\": %d,\"name\": \"%s\",\"state\": \"%c\",\"user\":\"%d\",\"memory\": %ld,", task->pid, task->comm, state, (task->cred->uid.val), ((task->mm ? task->mm->total_vm << (PAGE_SHIFT) : 0)/100) / (inf.totalram*4));
     seq_printf(archivo, "\"children\": [");
     list_for_each(list, &task->children) {
         child = list_entry(list, struct task_struct, sibling);
@@ -79,7 +98,13 @@ static int escribir_procesos (struct seq_file *archivo, struct task_struct *task
 static int escribir_archivo(struct seq_file * archivo, void *v) {       
     si_meminfo(&inf);
     seq_printf(archivo, "{\"tree\":");
-    
+    nproc = 0;
+    nprocexecuting = 0;
+    nprocsuspended = 0;
+    nprocstopped = 0;
+    nproczombie = 0;
+    nprocother = 0;
+
     escribir_procesos(archivo, &init_task);
     
     seq_printf(archivo, ",\"executing\":%i", nprocexecuting);
@@ -113,7 +138,7 @@ static struct file_operations operaciones =
 static int inicializar(void)
 {
     proc_create("cpu_201603095", 0, NULL, &operaciones);
-    printk(KERN_INFO "CARNET: 201603095\n");
+    printk(KERN_INFO "Abner Fernando Cardona Ramirez\n");
 
     return 0;
 }

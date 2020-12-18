@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import ChartistGraph from 'react-chartist';
-
+import request from 'superagent'
 
 class App extends Component {
 
@@ -25,9 +25,10 @@ class App extends Component {
          password: "",
          logged: false,
          url_api: this.url_api,
-         ram: 50,
-         total: 1024,
-         used: 512,
+         ram: 0,
+         total: 0,
+         used: 0,
+         usocpu:0,
          data: [
 
          ],
@@ -47,12 +48,13 @@ class App extends Component {
                []
             ]
          },
-         executing: 36,
-         suspended: 2673,
+         userName:'--',
+         executing: 0,
+         suspended: 0,
          stopped: 0,
          zombie: 0,
-         other: 891,
-         totalprocess: 3600
+         other: 0,
+         totalprocess: 0
       }
       this.initInterval = this.initInterval.bind(this)
       this.process = this.process.bind(this)
@@ -98,6 +100,25 @@ class App extends Component {
          this.setState(this.state); 
          this.state.mi_ram.LineDataRAM.series[0].push(((this.state.mi_ram.totalRam - this.state.mi_ram.ramLibre)/this.state.mi_ram.totalRam)*100)
       })
+
+      fetch(this.url_api + '/getcpuinfo').then(res => {
+         return res.text()
+      }).then((dat) => {
+         dat = dat.toString().replace(/,}/g, "}")
+         dat = dat.toString().replace(/,]/g, "]")
+         var data = JSON.parse(dat)
+
+         if (this.state.LineDataCPU.series[0].length > 9) {
+            this.state.LineDataCPU.series[0].shift()
+            this.state.LineDataCPU.labels.shift()
+         }
+
+         this.state.usocpu = (data.usoCpu).toFixed(2);
+         this.state.LineDataCPU = this.state.LineDataCPU;   
+         this.setState(this.state); 
+         this.state.LineDataCPU.series[0].push(this.state.usocpu)
+      })
+
       //console.log(this.state.mi_ram.LineDataRAM);
       
 
@@ -108,7 +129,7 @@ class App extends Component {
          dat = dat.toString().replace(/,}/g, "}")
          dat = dat.toString().replace(/,]/g, "]")
 
-         var data = JSON.parse(dat)
+         var data2 = JSON.parse(dat)
 
          /*
          this.state.LineDataCPU.series[0].push(data.totalram - data.freeram)
@@ -117,20 +138,22 @@ class App extends Component {
             this.state.LineDataRAM.labels.shift()
          }
          */
+         console.log(data2);
          this.setState({
-            ram: data.usedram,
-            total: data.totalram,
-            used: data.totalram - data.freeram,
-            data: [data.tree],
+            ram: data2.usedram,
+            total: data2.totalram,
+            used: data2.totalram - data2.freeram,
+            data: [data2.tree],
             LineDataCPU: this.state.LineDataCPU,
-            executing: data.executing,
-            suspended: data.suspended,
-            stopped: data.stopped,
-            zombie: data.zombie,
-            other: data.other,
-            totalprocess: data.total
+            executing: data2.executing,
+            suspended: data2.suspended,
+            stopped: data2.stopped,
+            zombie: data2.zombie,
+            other: data2.other,
+            totalprocess: data2.total
          })
       })
+      
       
    }
 
@@ -172,16 +195,42 @@ class App extends Component {
       //if (children !== null && children !== undefined && children.length > 0)
 
       return children.map((child, i) => {
+         
+         
 
+         /*
+         fetch(this.url_api + '/getusername/'+child.user).then(res => {
+            return res.text()
+         }).then((dat1) => {
+            var data3
+            try{
+               data3= JSON.parse(dat1)
+               this.setState(
+                  {
+                     userName: data3.userName
+                  }
+               )
+               //nombre_usuario_actual = data3.userName;
+            }catch(e){
+               this.setState(
+                  {
+                     userName: '*-*-*-*-'
+                  }
+               )
+               //nombre_usuario_actual = '*****'
+            }
+            
+         })
+         */
          return (
-
+            
             <div className="" id={"p_" + parent} key={i} style={{ paddingLeft: padding }}>
                <div className="panel list-group font-weight-light">
                   <a href={"#c_" + child.pid} data-parent={"#p_" + parent} data-toggle="collapse" className="list-group-item list-group-item-action m-0 p-0">
                      <div className="row m-0 p-0">
                         <p className="col-1 m-0 p-0"><small>{child.pid}</small></p>
                         <p className="col-5 m-0 p-0"><small>{child.name}</small></p>
-                        <p className="col-2 m-0 p-0"><small>{child.state}</small></p>
+                        <p className="col-2 m-0 p-0"><small>{(child.state==="S"?"Spleeping":child.state === "D"? "Stopped": child.state==="E"? "Running": child.state==="Z"?"Zombie":"Other")}</small></p>
                         <p className="col-2 m-0 p-0"><small>{child.user}</small></p>
                         <p className="col-1 m-0 p-0"><small>{child.memory}</small></p>
                         <button onClick={this.handleClickKill} value={child.pid} type="button" className="col-1 btn rounded-circle p-0"><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="red" className="bi bi-trash" viewBox="0 0 16 16">
@@ -215,7 +264,7 @@ class App extends Component {
    appView() {
       return (
          <div className="App">
-            <nav className="navbar navbar-dark bg-dark justify-content-center">
+            <nav className="navbar navbar-dark bg-primary justify-content-center">
                <span className="navbar-brand">Monitor de Recursos</span>
             </nav>
 
@@ -330,7 +379,7 @@ class App extends Component {
                            <div className="row">
                               <div className="col col-12 col-md-12">
                                  <span className="d-block text-muted">En Uso (%)</span>
-                                 <span className="d-block display-4">{this.state.used}</span>
+                                 <span className="d-block display-4">{this.state.usocpu}</span>
                               </div>
                            </div>
                         </div>
@@ -338,17 +387,17 @@ class App extends Component {
 
                      <div className="card mt-3">
                         <div className="card-header">
-                           <h1 className="h4">RAM en Uso</h1>
+                           <h1 className="h4">CPU en Uso</h1>
                         </div>
                         <div className="card-body">
-                           <ChartistGraph data={this.state.mi_ram.LineDataCPU} options={
+                           <ChartistGraph data={this.state.LineDataCPU} options={
                               {
                                  low: 0,
                                  showArea: true
                               }
                            } type={'Line'} />
                            <div className="d-flex justify-content-around mt-4">
-                              <label htmlFor="">RAM: {this.state.ram}%</label>
+                              <label htmlFor="">CPU: {this.state.usocpu}%</label>
                            </div>
                         </div>
                      </div>
