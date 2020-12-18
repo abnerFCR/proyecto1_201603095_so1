@@ -262,3 +262,8 @@ Seccion de CPU
 
 Los test se hicieron en base a la herramienta Locust la cual se encarga de estresar la pagina llenandola de solicitudes, emulando el trafico de diferentes usuarios. 
 
+Imagenes de Tests de Trafico con locust
+
+![image](https://user-images.githubusercontent.com/37676214/102576282-c3eb3b00-40ba-11eb-94a3-b7009e97f34b.png)
+
+![image](https://user-images.githubusercontent.com/37676214/102576309-d1082a00-40ba-11eb-843b-b70357a8e524.png)
