@@ -131,13 +131,6 @@ class App extends Component {
 
          var data2 = JSON.parse(dat)
 
-         /*
-         this.state.LineDataCPU.series[0].push(data.totalram - data.freeram)
-         if (this.state.LineDataRAM.series[0].length > 9) {
-            this.state.LineDataRAM.series[0].shift()
-            this.state.LineDataRAM.labels.shift()
-         }
-         */
          console.log(data2);
          this.setState({
             ram: data2.usedram,
@@ -193,56 +186,14 @@ class App extends Component {
       })
    }
 
-/*
-   handleInpunt(e) {
-      var { value, name } = e.target
-      if (this.state.logged) {
-         if (value.endsWith("/")) {
-            value = value.substring(0, value.length - 1);
-         }
-         if (!value.toLocaleLowerCase().startsWith("http://")) {
-            value = "http://" + value
-         }
-         this.url_api = e.value
-      }
-      this.setState({
-         [name]: value
-      })
-   }
-*/
+
    process(children, parent, padding) {
       //if (children !== null && children !== undefined && children.length > 0)
 
       return children.map((child, i) => {
          
-         
-
-         /*
-         fetch(this.url_api + '/getusername/'+child.user).then(res => {
-            return res.text()
-         }).then((dat1) => {
-            var data3
-            try{
-               data3= JSON.parse(dat1)
-               this.setState(
-                  {
-                     userName: data3.userName
-                  }
-               )
-               //nombre_usuario_actual = data3.userName;
-            }catch(e){
-               this.setState(
-                  {
-                     userName: '*-*-*-*-'
-                  }
-               )
-               //nombre_usuario_actual = '*****'
-            }
-            
-         })
-         */
-         return (
-            
+	 return (
+           
             <div className="" id={"p_" + parent} key={i} style={{ paddingLeft: padding }}>
                <div className="panel list-group font-weight-light">
                   <a href={"#c_" + child.pid} data-parent={"#p_" + parent} data-toggle="collapse" className="list-group-item list-group-item-action m-0 p-0">
@@ -279,8 +230,6 @@ class App extends Component {
    }
 
    render() {
-      //this.initInterval()
-      //this.req()
       return (
          this.appView()
       );
